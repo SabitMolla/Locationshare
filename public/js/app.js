@@ -23,6 +23,15 @@ const App = (function() {
     MapManager.initMap();
     ChatManager.initChat();
     AdminManager.initAdmin();
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => console.log('✓ PWA Service Worker registered:', reg.scope))
+          .catch((err) => console.warn('Service Worker registration error:', err));
+      });
+    }
   }
 
   function setupEventListeners() {
@@ -117,11 +126,37 @@ const App = (function() {
       MapManager.fitAll();
     });
 
-    document.getElementById('btnToggleLayer')?.addEventListener('click', () => {
-      MapManager.toggleLayer();
+    // PWA: Add to Home Screen Prompt Handling
+    let deferredPrompt = null;
+    const btnInstallPwa = document.getElementById('btnInstallPwa');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (btnInstallPwa) {
+        btnInstallPwa.style.display = 'flex';
+      }
     });
 
+    btnInstallPwa?.addEventListener('click', async () => {
+      closeModal('userMenuModal');
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          showToast('Installing LocationPulse app...', 'success');
+        }
+        deferredPrompt = null;
+      } else {
+        showToast('To install: Tap your browser menu (⋮) or Share button and select "Add to Home screen" or "Install App".');
+      }
+    });
 
+    window.addEventListener('appinstalled', () => {
+      if (btnInstallPwa) btnInstallPwa.style.display = 'none';
+      showToast('LocationPulse installed to your home screen!', 'success');
+      deferredPrompt = null;
+    });
   }
 
   async function handleLogin() {

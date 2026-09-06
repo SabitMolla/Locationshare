@@ -6,8 +6,15 @@
   <meta name="theme-color" content="#0a0e17" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LocationPulse" />
+  <meta name="application-name" content="LocationPulse" />
   <title>LocationPulse • Live Location Sharing & Chat System</title>
   <meta name="description" content="Real-time multi-user location sharing and live messaging platform with comprehensive admin management." />
+
+  <!-- PWA Manifest & App Icons -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -455,6 +462,17 @@
         </button>
 
 
+
+        <!-- Install App (PWA) Option -->
+        <button type="button" class="menu-action-btn" id="btnInstallPwa" style="display: none;">
+          <div class="menu-action-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div class="menu-action-text">
+            <strong style="color: #34d399;">Install App on Phone</strong>
+            <span>Add shortcut to home screen for fullscreen experience</span>
+          </div>
+        </button>
 
         <!-- Switch Map Theme -->
         <button type="button" class="menu-action-btn" onclick="MapManager.toggleLayer();">

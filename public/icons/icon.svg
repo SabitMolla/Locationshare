@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect x="20" y="20" width="472" height="472" rx="100" fill="url(#bgGrad)" stroke="#38bdf8" stroke-opacity="0.3" stroke-width="4" />
+
+  <!-- Radar Rings -->
+  <circle cx="256" cy="225" r="160" fill="none" stroke="#38bdf8" stroke-opacity="0.12" stroke-width="3" />
+  <circle cx="256" cy="225" r="115" fill="none" stroke="#38bdf8" stroke-opacity="0.2" stroke-width="3" />
+  <circle cx="256" cy="225" r="70" fill="none" stroke="#38bdf8" stroke-opacity="0.3" stroke-width="3" />
+
+  <!-- Location Pin -->
+  <g filter="url(#glow)">
+    <path d="M256 120 C198 120 150 168 150 226 C150 295 256 380 256 380 C256 380 362 295 362 226 C362 168 314 120 256 120 Z" fill="url(#pinGrad)" />
+    <!-- Pin Center Hole -->
+    <circle cx="256" cy="220" r="42" fill="#0a0e17" />
+    <!-- Pulse Center Dot -->
+    <circle cx="256" cy="220" r="18" fill="#38bdf8" />
+  </g>
+</svg>
