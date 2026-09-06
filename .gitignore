@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Local database & data files
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Environment & Secrets
+.env
+.env.local
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+npm-debug.log*

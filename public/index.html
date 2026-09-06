@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0e17" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>LocationPulse • Live Location Sharing & Chat System</title>
+  <meta name="description" content="Real-time multi-user location sharing and live messaging platform with comprehensive admin management." />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+      </div>
+      <div class="brand-title">
+        LocationPulse
+        <span class="brand-badge">Real-Time</span>
+      </div>
+    </div>
+
+    <!-- Mobile Screen Switcher -->
+    <div class="mobile-view-toggle">
+      <button class="mobile-toggle-btn active" id="btnToggleChat" onclick="setMobileView('chat')">💬 Chat</button>
+      <button class="mobile-toggle-btn" id="btnToggleMap" onclick="setMobileView('map')">🗺️ Map</button>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="nav-actions">
+      <!-- Live GPS Streaming Button -->
+      <button class="btn btn-live-tracking" id="btnLiveTracking" title="Toggle automatic continuous GPS broadcasting">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+        <span id="liveTrackingText">Live GPS: Off</span>
+      </button>
+
+      <!-- Share Location Action -->
+      <button class="btn btn-primary" id="btnShareLocationNav" title="Broadcast current location immediately">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Share Location</span>
+      </button>
+
+      <!-- Admin Panel Button (Hidden for non-admin) -->
+      <button class="btn btn-admin" id="btnAdminPanel" style="display: none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span>Admin Console</span>
+      </button>
+
+      <!-- User Info Pill -->
+      <div class="user-pill" id="userPill">
+        <div class="user-avatar-tiny" id="userAvatarInitial">?</div>
+        <div class="user-details">
+          <span class="user-name-display" id="userNameDisplay">Guest</span>
+          <span class="user-role-badge" id="userRoleBadge">User</span>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <button class="btn btn-secondary" id="btnLogout" title="Log out of current session">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Split Dashboard -->
+  <main class="main-container">
+    <!-- Left Pane: Chat Box -->
+    <section class="chat-container" id="chatContainer">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <div class="room-status-indicator"></div>
+          <div>
+            <div class="chat-title">General Channel</div>
+            <div class="chat-subtitle" id="onlineStatusSubtitle">Connecting to live network...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Online Users Bar -->
+      <div class="online-users-bar" id="onlineUsersBar">
+        <span class="online-tag">Online:</span>
+        <div class="online-user-chip">
+          <div class="online-dot"></div>
+          <span>Loading...</span>
+        </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="chat-messages" id="chatMessages">
+        <!-- Messages rendered dynamically -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="typing-indicator" id="typingIndicator" style="display: none;">
+        <span>Someone is typing...</span>
+      </div>
+
+      <!-- Input Area -->
+      <form class="chat-input-area" id="chatForm">
+        <!-- Attached Location Preview Bar (appears when location is attached) -->
+        <div class="attached-location-bar" id="attachedLocationBar" style="display: none;">
+          <div class="attached-location-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="attachedLocationText">GPS Location Attached</span>
+            <button type="button" class="btn-remove-attachment" id="btnRemoveAttachedLoc" title="Remove attached location">&times;</button>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <button type="button" class="chat-btn-icon chat-btn-location" id="btnShareLocationChat" title="Share current GPS location (with or without message)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </button>
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type a message or share location..." autocomplete="off" />
+          <button type="submit" class="chat-btn-icon chat-btn-send" id="btnSendMessage" title="Send Message">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Right Pane: Interactive Map -->
+    <section class="map-container" id="mapContainer">
+      <div id="leaflet-map"></div>
+
+      <!-- Map Floating Toolbar -->
+      <div class="map-floating-bar">
+        <button class="map-control-btn" id="btnCenterMe" title="Center map on my location">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
+          Center Me
+        </button>
+        <button class="map-control-btn" id="btnFitAll" title="Fit all active users into view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+          Fit All Users
+        </button>
+        <button class="map-control-btn" id="btnToggleLayer" title="Switch map style">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Theme
+        </button>
+      </div>
+
+      <!-- Bottom Floating Status Card -->
+      <div class="map-info-badge" id="mapInfoBadge">
+        <div class="online-dot" style="background:#38bdf8; box-shadow:0 0 8px #38bdf8;"></div>
+        <div>
+          <strong id="activeMapCount">0 users</strong> broadcasting location
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       MODAL 1: Authentication (Login)
+       ========================================================= -->
+  <div class="modal-overlay active" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="brand-icon" style="width: 32px; height: 32px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <span>Sign In to LocationPulse</span>
+        </div>
+      </div>
+      <div class="modal-body">
+        <!-- Auth Tabs: User vs Admin -->
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tabUserLogin" onclick="switchAuthTab('user')">User Login</div>
+          <div class="auth-tab" id="tabAdminLogin" onclick="switchAuthTab('admin')">Admin Portal</div>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" id="lblIdentifier">Phone Number</label>
+            <input type="text" id="loginIdentifier" class="form-input" placeholder="e.g. +1234567890" required autofocus />
+            <div class="form-hint" id="hintIdentifier">Enter the phone number registered by your administrator.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;" id="btnLoginSubmit">
+            Sign In to Network
+          </button>
+        </form>
+
+        <!-- Quick Demo Fill Helper -->
+        <div class="demo-accounts-box">
+          <div class="demo-title">⚡ Instant Test Credentials:</div>
+          <div class="demo-chips">
+            <button type="button" class="demo-chip" onclick="fillDemo('admin', 'admin')">
+              👑 Admin (admin / admin)
+            </button>
+            <button type="button" class="demo-chip" onclick="fillDemo('+1234567890', '123456')">
+              👤 Alex (+1234567890 / 123456)
+            </button>
+            <button type="button" class="demo-chip" onclick="fillDemo('+1987654321', '123456')">
+              👤 Sarah (+1987654321 / 123456)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 2: Admin Console (Create & Manage Users)
+       ========================================================= -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-card modal-card-large">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span>Administrator Management Console</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('adminModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Admin Navigation Tabs -->
+        <div class="auth-tabs admin-tabs-nav" style="margin-bottom: 20px;">
+          <div class="auth-tab active" id="tabAdminUsers" onclick="AdminManager.switchTab('users')">
+            👥 User Management
+          </div>
+          <div class="auth-tab" id="tabAdminReports" onclick="AdminManager.switchTab('reports')">
+            📊 Activity & Location Reports
+          </div>
+        </div>
+
+        <!-- Tab 1: User Management Section -->
+        <div id="adminUsersSection">
+          <!-- Metrics -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-value" id="metricTotalUsers">0</div>
+              <div class="metric-label">Registered Users</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metricOnlineUsers">0</div>
+              <div class="metric-label">Online Now</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metricActiveLocations">0</div>
+              <div class="metric-label">Mapped Locations</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metricTotalMessages">0</div>
+              <div class="metric-label">Chat Messages</div>
+            </div>
+          </div>
+
+          <!-- Create User Form -->
+          <div class="glass-panel" style="padding: 18px; margin-bottom: 24px;">
+            <h3 style="font-size: 0.95rem; margin-bottom: 14px; color: var(--accent-secondary); display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              Create New User Account
+            </h3>
+            <form id="createUserForm">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                <div>
+                  <label class="form-label">Phone Number / User ID *</label>
+                  <input type="text" id="newUserPhone" class="form-input" placeholder="e.g. +14155552671" required />
+                </div>
+                <div>
+                  <label class="form-label">Full Name / Display Name *</label>
+                  <input type="text" id="newUserName" class="form-input" placeholder="e.g. Michael Chen" required />
+                </div>
+                <div>
+                  <label class="form-label">Password *</label>
+                  <input type="password" id="newUserPassword" class="form-input" placeholder="At least 4 characters" required minlength="4" />
+                </div>
+                <div>
+                  <label class="form-label">Account Role</label>
+                  <select id="newUserRole" class="form-input">
+                    <option value="user">Regular User</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary" id="btnSubmitCreateUser">
+                  + Create & Authorize User
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- User Directory Table -->
+          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-primary);">
+            All Registered User Accounts
+          </h3>
+          <div style="overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Phone / Identifier</th>
+                  <th>Role</th>
+                  <th>Last Known Location</th>
+                  <th>Created</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody">
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading user records...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Activity & Location Reports Section -->
+        <div id="adminReportsSection" style="display: none;">
+          <!-- Filter Controls Bar -->
+          <div class="glass-panel report-filter-bar" style="padding: 18px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
+              <div>
+                <label class="form-label">Select User / Scope</label>
+                <select id="reportUserSelect" class="form-input">
+                  <option value="all">All Users (System Overview)</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Time Window</label>
+                <select id="reportTimeRangeSelect" class="form-input" onchange="AdminManager.onTimeRangeChange(this.value)">
+                  <option value="1h">Last 1 Hour</option>
+                  <option value="24h" selected>Last 24 Hours (Today)</option>
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                  <option value="custom">Custom Date Range...</option>
+                </select>
+              </div>
+              <div id="customDateRangeRow" style="display: none; grid-column: 1 / -1; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div>
+                  <label class="form-label">Start Date & Time</label>
+                  <input type="datetime-local" id="reportCustomStart" class="form-input" />
+                </div>
+                <div>
+                  <label class="form-label">End Date & Time</label>
+                  <input type="datetime-local" id="reportCustomEnd" class="form-input" />
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" onclick="AdminManager.generateReport()">
+                  🔍 Generate Report
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="AdminManager.printReport()" id="btnPrintReportBtn">
+                  🖨️ Print / Save PDF
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="AdminManager.exportReportCSV()" id="btnExportCSVBtn">
+                  📥 Export CSV
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Printable Report Document Container -->
+          <div id="printableReportArea">
+            <div id="reportDocumentContent">
+              <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                Select a user scope and time range, then click <strong>"Generate Report"</strong> to preview and print.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- =========================================================
+       MODAL 4: Share Location Options (Just Share vs Share with Message)
+       ========================================================= -->
+  <div class="modal-overlay" id="shareLocationModal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Share Your Location</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('shareLocationModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 18px;">
+          Choose how you would like to share your location with everyone:
+        </p>
+
+        <!-- Option 1: Just Share Location -->
+        <button type="button" class="share-option-card" id="btnOptJustShare">
+          <div class="share-opt-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="share-opt-content">
+            <strong>⚡ Just Share Location</strong>
+            <span>Instantly broadcast your coordinates with default setup</span>
+          </div>
+        </button>
+
+        <div style="display: flex; align-items: center; margin: 18px 0; color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;">
+          <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+          <span style="padding: 0 10px;">or with a custom message</span>
+          <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+        </div>
+
+        <!-- Option 2: Share with a message -->
+        <form id="shareWithMessageForm">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Add a Message</label>
+            <textarea id="shareLocationMsgInput" class="form-input" rows="2" placeholder="e.g. Waiting here at the entrance, meet me inside!" style="resize: none;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px;" id="btnOptShareWithMsg">
+            💬 Share Location with Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 5: Mobile User Menu & Settings (Bottom Sheet on Mobile)
+       ========================================================= -->
+  <div class="modal-overlay" id="userMenuModal">
+    <div class="modal-card modal-sheet-mobile" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="user-avatar-tiny" id="modalUserAvatar">?</div>
+          <div style="display: flex; flex-direction: column; line-height: 1.2;">
+            <span id="modalUserName" style="font-size: 0.95rem;">User Name</span>
+            <span id="modalUserPhone" style="font-size: 0.72rem; color: var(--text-secondary);">+1234567890</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('userMenuModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Live GPS Toggle Option -->
+        <button type="button" class="menu-action-btn" id="btnMobileLiveTracking">
+          <div class="menu-action-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+          </div>
+          <div class="menu-action-text">
+            <strong id="mobileLiveText">Toggle Live GPS Tracking</strong>
+            <span>Continuous location broadcasting</span>
+          </div>
+        </button>
+
+        <!-- Admin Console Option (if admin) -->
+        <button type="button" class="menu-action-btn" id="btnMobileAdmin" style="display: none;">
+          <div class="menu-action-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="menu-action-text">
+            <strong>Admin Console</strong>
+            <span>Create & manage user accounts</span>
+          </div>
+        </button>
+
+
+
+        <!-- Switch Map Theme -->
+        <button type="button" class="menu-action-btn" onclick="MapManager.toggleLayer();">
+          <div class="menu-action-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div class="menu-action-text">
+            <strong>Toggle Map Theme</strong>
+            <span>Switch between Street and Dark view</span>
+          </div>
+        </button>
+
+        <!-- Logout -->
+        <button type="button" class="menu-action-btn" style="border-color: rgba(239, 68, 68, 0.2);" onclick="closeModal('userMenuModal'); App.logout();">
+          <div class="menu-action-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </div>
+          <div class="menu-action-text">
+            <strong style="color: #f87171;">Log Out</strong>
+            <span>Sign out of this session</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar (Visible on screens <= 768px) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button type="button" class="mobile-nav-item active" data-view="chat" onclick="setMobileView('chat')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Chat</span>
+    </button>
+
+    <!-- Floating Center Action: Share Location -->
+    <button type="button" class="mobile-nav-center-action" id="btnMobileCenterShare" title="Share Location">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </button>
+
+    <button type="button" class="mobile-nav-item" data-view="map" onclick="setMobileView('map')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span>Map</span>
+    </button>
+
+    <button type="button" class="mobile-nav-item" id="btnMobileMenuTrigger" onclick="openModal('userMenuModal')">
+      <div class="user-avatar-tiny" id="navMobileAvatar" style="width: 22px; height: 22px; font-size: 0.65rem;">?</div>
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- External & Vendor Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Modular App Scripts -->
+  <script src="/js/map.js"></script>
+  <script src="/js/location.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/admin.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
