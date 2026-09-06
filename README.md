@@ -1,4 +1,4 @@
-# LocationPulse • Real-Time Location Sharing & Tracking
+# Dots Location Update • Real-Time Location Sharing & Tracking
 
 A real-time, privacy-focused location sharing and group communication web application with administrator user management, live GPS tracking, and OpenStreetMap integration.
 

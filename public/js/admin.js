@@ -408,7 +408,7 @@ const AdminManager = (function() {
         <!-- Document Header -->
         <div class="report-doc-header">
           <div>
-            <div class="report-doc-title">LOCATIONPULSE • ACTIVITY & AUDIT REPORT</div>
+            <div class="report-doc-title">DOTS LOCATION UPDATE • ACTIVITY & AUDIT REPORT</div>
             <div class="report-doc-subtitle">Official tracking and communication report</div>
             <div class="report-badge-meta">
               <span class="report-pill"><strong>Scope:</strong> ${escapeHTML(data.filter.userName)}</span>
@@ -487,7 +487,7 @@ const AdminManager = (function() {
     a.href = url;
     const dateStr = new Date().toISOString().slice(0, 10);
     const scopeSlug = (currentReportData.filter.userName || 'report').toLowerCase().replace(/[^a-z0-9]/g, '_');
-    a.download = `LocationPulse_Report_${scopeSlug}_${dateStr}.csv`;
+    a.download = `DotsLocationUpdate_Report_${scopeSlug}_${dateStr}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -185,7 +185,7 @@ app.get('/api/geocode/reverse', async (req, res) => {
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=16&addressdetails=1`,
       {
         headers: {
-          'User-Agent': 'LocationShareApp/1.0 (internal-demo)'
+          'User-Agent': 'DotsLocationUpdate/1.0'
         }
       }
     );
@@ -230,7 +230,7 @@ if (require.main === module) {
   server.listen(PORT, '0.0.0.0', () => {
     const localIp = getLocalIp();
     console.log(`======================================================`);
-    console.log(`🚀 LocationShare is accessible on your local network:`);
+    console.log(`🚀 Dots Location Update is accessible on your local network:`);
     console.log(`📱 Mobile Network URL:  http://${localIp}:${PORT}`);
     console.log(`💻 Local Desktop URL:   http://localhost:${PORT}`);
     console.log(`------------------------------------------------------`);

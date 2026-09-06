@@ -144,7 +144,7 @@ const App = (function() {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-          showToast('Installing LocationPulse app...', 'success');
+          showToast('Installing Dots Location Update app...', 'success');
         }
         deferredPrompt = null;
       } else {
@@ -154,7 +154,7 @@ const App = (function() {
 
     window.addEventListener('appinstalled', () => {
       if (btnInstallPwa) btnInstallPwa.style.display = 'none';
-      showToast('LocationPulse installed to your home screen!', 'success');
+      showToast('Dots Location Update installed to your home screen!', 'success');
       deferredPrompt = null;
     });
   }

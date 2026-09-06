@@ -1,5 +1,5 @@
-// LocationPulse Service Worker
-const CACHE_NAME = 'locationpulse-v1';
+// Dots Location Update Service Worker
+const CACHE_NAME = 'dots-location-update-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
