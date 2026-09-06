@@ -235,7 +235,6 @@ if (require.main === module) {
     console.log(`💻 Local Desktop URL:   http://localhost:${PORT}`);
     console.log(`------------------------------------------------------`);
     console.log(`🔑 Admin Login: ID "admin" / Password "admin"`);
-    console.log(`👥 Sample User: Phone "+1234567890" / Password "123456"`);
     console.log(`======================================================`);
   });
 }

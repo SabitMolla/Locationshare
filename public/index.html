@@ -179,17 +179,11 @@
         </div>
       </div>
       <div class="modal-body">
-        <!-- Auth Tabs: User vs Admin -->
-        <div class="auth-tabs">
-          <div class="auth-tab active" id="tabUserLogin" onclick="switchAuthTab('user')">User Login</div>
-          <div class="auth-tab" id="tabAdminLogin" onclick="switchAuthTab('admin')">Admin Portal</div>
-        </div>
-
         <form id="loginForm">
           <div class="form-group">
-            <label class="form-label" id="lblIdentifier">Phone Number</label>
-            <input type="text" id="loginIdentifier" class="form-input" placeholder="e.g. +1234567890" required autofocus />
-            <div class="form-hint" id="hintIdentifier">Enter the phone number registered by your administrator.</div>
+            <label class="form-label" id="lblIdentifier">Phone Number or ID</label>
+            <input type="text" id="loginIdentifier" class="form-input" placeholder="Enter Phone Number or ID" required autofocus />
+            <div class="form-hint" id="hintIdentifier">Log in with your registered phone number or administrator credentials.</div>
           </div>
 
           <div class="form-group">
@@ -198,25 +192,9 @@
           </div>
 
           <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;" id="btnLoginSubmit">
-            Sign In to Network
+            Sign In
           </button>
         </form>
-
-        <!-- Quick Demo Fill Helper -->
-        <div class="demo-accounts-box">
-          <div class="demo-title">⚡ Instant Test Credentials:</div>
-          <div class="demo-chips">
-            <button type="button" class="demo-chip" onclick="fillDemo('admin', 'admin')">
-              👑 Admin (admin / admin)
-            </button>
-            <button type="button" class="demo-chip" onclick="fillDemo('+1234567890', '123456')">
-              👤 Alex (+1234567890 / 123456)
-            </button>
-            <button type="button" class="demo-chip" onclick="fillDemo('+1987654321', '123456')">
-              👤 Sarah (+1987654321 / 123456)
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </div>

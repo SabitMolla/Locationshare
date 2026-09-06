@@ -411,47 +411,7 @@ function closeModal(modalId) {
   if (modal) modal.classList.remove('active');
 }
 
-function switchAuthTab(type) {
-  const tabUser = document.getElementById('tabUserLogin');
-  const tabAdmin = document.getElementById('tabAdminLogin');
-  const lblId = document.getElementById('lblIdentifier');
-  const inputId = document.getElementById('loginIdentifier');
-  const hintId = document.getElementById('hintIdentifier');
 
-  if (type === 'admin') {
-    tabAdmin?.classList.add('active');
-    tabUser?.classList.remove('active');
-    if (lblId) lblId.textContent = 'Admin Identifier';
-    if (inputId) {
-      inputId.placeholder = 'admin';
-      inputId.value = 'admin';
-    }
-    if (hintId) hintId.textContent = 'Administrator ID is "admin"';
-  } else {
-    tabUser?.classList.add('active');
-    tabAdmin?.classList.remove('active');
-    if (lblId) lblId.textContent = 'Phone Number';
-    if (inputId) {
-      inputId.placeholder = 'e.g. +1234567890';
-      inputId.value = '';
-    }
-    if (hintId) hintId.textContent = 'Enter the phone number registered by your administrator.';
-  }
-}
-
-function fillDemo(identifier, password) {
-  const inputId = document.getElementById('loginIdentifier');
-  const inputPass = document.getElementById('loginPassword');
-
-  if (identifier.toLowerCase() === 'admin') {
-    switchAuthTab('admin');
-  } else {
-    switchAuthTab('user');
-  }
-
-  if (inputId) inputId.value = identifier;
-  if (inputPass) inputPass.value = password;
-}
 
 
 

@@ -27,16 +27,33 @@ async function testReports() {
       throw new Error('Invalid all-users report structure');
     }
 
-    // 3. Query Per-User Report for User ID 2 (Alex Taylor)
-    const perUserReportRes = await fetch(`${baseUrl}/api/admin/reports?userId=2`, {
+    // 2b. Create a temporary user for report testing
+    const tempPhone = '+1555' + Math.floor(1000000 + Math.random() * 9000000);
+    const createUserRes = await fetch(`${baseUrl}/api/admin/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminAuth.token}`
+      },
+      body: JSON.stringify({
+        phone: tempPhone,
+        name: 'Report Test User',
+        password: 'reportpass123'
+      })
+    });
+    const createdUserData = await createUserRes.json();
+    const testUserId = createdUserData.user.id;
+
+    // 3. Query Per-User Report for Created User
+    const perUserReportRes = await fetch(`${baseUrl}/api/admin/reports?userId=${testUserId}`, {
       headers: { 'Authorization': `Bearer ${adminAuth.token}` }
     });
     const userReport = await perUserReportRes.json();
-    console.log('3. Per-User Report for Alex Taylor (ID 2):', perUserReportRes.status);
+    console.log(`3. Per-User Report for ${createdUserData.user.name} (ID ${testUserId}):`, perUserReportRes.status);
     console.log('   - Filter target:', userReport.filter.userName);
     console.log('   - User summary:', userReport.summary);
 
-    if (userReport.filter.userId !== 2) {
+    if (userReport.filter.userId !== testUserId) {
       throw new Error('Per-user report filter mismatch');
     }
 
@@ -44,7 +61,7 @@ async function testReports() {
     const userLoginRes = await fetch(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: '+1234567890', password: '123456' })
+      body: JSON.stringify({ phone: tempPhone, password: 'reportpass123' })
     });
     const userAuth = await userLoginRes.json();
     const forbiddenRes = await fetch(`${baseUrl}/api/admin/reports?userId=all`, {
@@ -54,6 +71,12 @@ async function testReports() {
     if (forbiddenRes.status !== 403) {
       throw new Error('Security check failed: regular user accessed admin reports');
     }
+
+    // Cleanup temporary user
+    await fetch(`${baseUrl}/api/admin/users/${testUserId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${adminAuth.token}` }
+    });
 
     console.log('\n🎉 ALL ADMIN REPORT GENERATION CHECKS PASSED PERFECTLY!');
   } catch (err) {

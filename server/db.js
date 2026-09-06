@@ -80,26 +80,11 @@ function seedInitialData() {
     console.log('✓ Seeded admin user (ID: admin, Pass: admin)');
   }
 
-  // Seed two sample users for immediate testing if no users exist besides admin
-  const userCount = db.prepare(`SELECT COUNT(*) as count FROM users WHERE role = 'user'`).get().count;
-  if (userCount === 0) {
-    const userPassHash = bcrypt.hashSync('123456', 10);
-    const now = new Date().toISOString();
-    
-    // User 1
-    db.prepare(`
-      INSERT INTO users (phone, name, password_hash, role, created_at)
-      VALUES (?, ?, ?, ?, ?)
-    `).run('+1234567890', 'Alex Taylor', userPassHash, 'user', now);
-
-    // User 2
-    db.prepare(`
-      INSERT INTO users (phone, name, password_hash, role, created_at)
-      VALUES (?, ?, ?, ?, ?)
-    `).run('+1987654321', 'Sarah Jenkins', userPassHash, 'user', now);
-
-    console.log('✓ Seeded sample users for instant demonstration (+1234567890 / 123456, +1987654321 / 123456)');
-  }
+  // Clean up any demo sample users and orphaned records
+  db.prepare(`DELETE FROM users WHERE phone IN ('+1234567890', '+1987654321')`).run();
+  db.prepare(`DELETE FROM messages WHERE user_id NOT IN (SELECT id FROM users)`).run();
+  db.prepare(`DELETE FROM locations WHERE user_id NOT IN (SELECT id FROM users)`).run();
+  db.prepare(`DELETE FROM location_history WHERE user_id NOT IN (SELECT id FROM users)`).run();
 }
 
 seedInitialData();
